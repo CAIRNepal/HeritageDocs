@@ -8,8 +8,8 @@ imports:
 prefixes:
   crm: "http://www.cidoc-crm.org/cidoc-crm/"
   linkml: "https://w3id.org/linkml/"
-  chlod: "https://cair-nepal.org/chlod"
-  prov: "" # TBA (To Be Added)
+  chlod: "https://cair-nepal.org/heritagegraph/"
+  prov: "https://www.w3.org/ns/prov/"
 
 default_prefix: chlod 
 
@@ -30,14 +30,15 @@ classes:
       - ConditionState
 
       # Relationships with other classes
-      - created_by
-      - originated_in
+      - was_produced_by
+      - current_location
       - associated_with
       - documented_in
       - belongs_to_period
 
   Cultural_Association:
-    description: "Superclass for Event and Tradition_or_Practise that a Cultural Entity can be associated with"
+    class_uri: chlod:Cultural_Association
+    description: "Superclass for Event and Tradition_or_Practice that a Cultural Entity can be associated with"
     slots: 
       - associated_event
       - associated_tradition
@@ -69,6 +70,23 @@ classes:
       - Type 
       - Description
       - ConditionState
+      - currently_holds 
+
+      # Relationships
+      - site_of
+      - hosted_event
+      - belongs_to_period
+
+  # Activity:
+  #   class_uri: crm:E7_Activity
+  #   description: 
+  #   slots:
+  #     - P14_carried_out_by 
+  #     - P15_was_influenced_by
+  #     - P32_used_general_technique
+  #     - P33_used_specific_technique
+  #     - P125_used_object_of_type
+  #     - P134_continued
 
   Event:
     class_uri: crm:E5_Event
@@ -82,6 +100,13 @@ classes:
       - EndDate 
       - Description 
       - Recurrence
+    
+      # Relationships
+      - has_practice_type
+      - occurs_at
+      - event_involves
+      - associated_cultural_entity
+      - documented_in
 
   Historical_Period:
     class_uri: crm:E4_Period
@@ -93,7 +118,12 @@ classes:
       - EndDate
       - Description 
 
-  Tradition_or_Practise:
+      # Relationship
+      - includes_cultural_entity
+      - includes_event
+      - includes_person
+
+  Tradition_or_Practice:
     class_uri: crm:E28_Conceptual_Object # I guess this is too vague maybe we can define custom class
     is_a: Cultural_Association
     description: 
@@ -103,6 +133,12 @@ classes:
       - Type 
       - Description 
       - AssociatedMaterials
+
+      # Relationships
+      # - practiced_by
+      - uses
+      - documented_in
+      - tradition_associated_with 
 
 ## MARK
   Source:
@@ -115,6 +151,14 @@ classes:
       - PublicationYear
       - Type 
       - URL_or_DigitalLink
+
+      # Relationships
+      - documents_cultural_entity
+      - documents_event
+      - documents_tradition
+      - documents_actor
+      - documents_historical_period
+  
 
   ### Additional Added
   Material:
@@ -135,7 +179,7 @@ classes:
       - Type 
 
   ConditionAssesment:
-    class_uri: 
+    class_uri: crm:E14_Condition_Assessment
     description: >
       The act of assessing the state of preservation of a Cultural_Entity.
     slots:
@@ -163,6 +207,17 @@ classes:
     slots:
       - Value 
       - CRS
+
+  Type:
+    class_uri: crm:E55_Type
+
+  TimeSpan:
+    class_uri: crm:E52_Time-Span
+    slots:
+      - BeginDate
+      - EndDate
+
+
 
 slots:
   Name:
@@ -193,13 +248,13 @@ slots:
     description: Numeric value of the dimension or spacetime.
 
   Unit:
-    slot_uri: crm_P91_has_unit
+    slot_uri: crm:P91_has_unit
     range: string
     description: Unit of measurement for the value 
 
   Type:
     slot_uri: crm:P2_has_type 
-    range: string 
+    range: Type 
     description: Type of dimension, e.g., maximum linear extent, wingspan, weight.
 
   Dimension:
@@ -209,7 +264,7 @@ slots:
     multivalued: true
 
   DateCreated:
-    slot_uri: P108i_was_produced_by
+    slot_uri: crm:P108i_was_produced_by
     range: string 
     description: Date or period when the artifact was created.
 
@@ -248,6 +303,11 @@ slots:
     slot_uri: crm:P138_1_mode_of_representation
     range: string
     description: Mode of representation (e.g., digitization, photo, 3D scan).
+  
+  timespan:
+    slot_uri: crm:P4_has_time-span
+    range: TimeSpan
+
 
   FileURI:
     slot_uri: crm:P128_carries
@@ -287,12 +347,12 @@ slots:
   # this is bit sketchy here (StartDate, EndDate) maybe we need to define the Date class here 
   StartDate:
     slot_uri: crm:P4_has_time-span
-    range: string
+    range: TimeSpan
     description: Start date or time-span of the event.
 
   EndDate:
     slot_uri: crm:P4_has_time-span
-    range: string
+    range: TimeSpan
     description: End date or time-span of the event.
 
   Recurrence: 
@@ -341,15 +401,19 @@ slots:
     multivalued: true
 
   # Relationships of Cultural Entity with other classes
-  created_by:
-    slot_uri: crm:P14_carried_out_by
+  was_produced_by:
+    slot_uri: crm:P108i_was_produced_by
     range: Actor
     multivalued: true  
 
-  originated_in:
-    slot_uri: crm:P7_took_place_at
+  current_location:
+    slot_uri: crm:P55_has_current_location
     range: Location 
     multivalued: true 
+
+  currently_holds:
+    slot_uri: crm:P55i_currently_holds
+    range: Cultural_Entity   
 
   associated_with:
     slot_uri: crm:P46_is_composed_of
@@ -362,7 +426,7 @@ slots:
     multivalued: true 
     
   belongs_to_period:
-    slot_uri: crm:P4_has_time
+    slot_uri: crm:P4_has_time-span
     range: Historical_Period
     multivalued: false 
 
@@ -371,12 +435,12 @@ slots:
     multivalued: true
 
   associated_tradition:
-    range: Tradition_or_Practise
+    range: Tradition_or_Practice
     multivalued: true
 
   # Relationships of Actor class with others
   created:
-    slot_uri: crm:P14_carried_out_by
+    slot_uri: crm:P14i_performed
     range: Cultural_Entity
     multivalued: true 
 
@@ -390,6 +454,96 @@ slots:
     range: Event
     multivalued: true 
 
+  # Relationship of Location with other classes
+  site_of:
+    slot_uri: crm:P53_has_former_or_current_location
+    range: Cultural_Entity
+    multivalued: true 
+
+  hosted_event:
+    slot_uri: crm:E5_Event
+    range: Event
+    multivalued: true 
+
+  # Relationship of Event with other classes
+  occurs_at:
+    slot_uri: crm:P7_took_place_at
+    range: Location 
+    multivalued: true 
+
+  event_involves:
+    slot_uri: crm:P11_had_participant
+    range: Actor 
+    multivalued: true 
+
+  associated_cultural_entity:
+    slot_uri: crm:P12_occurred_in_the_presence_of
+    range: Cultural_Entity
+    multivalued: true 
+
+
+  # Relationship of Historical Period with other classes
+  includes_cultural_entity:
+    slot_uri: crm:P12_occurred_in_the_presence_of  # or consider a custom property if needed
+    range: Cultural_Entity
+    multivalued: true
+
+  includes_event:
+    slot_uri: crm:P12_occurred_in_the_presence_of  # could define separate property to distinguish
+    range: Event
+    multivalued: true
+    
+  includes_person:
+    slot_uri: crm:P12_occurred_in_the_presence_of  # or define custom property linking period to Actor
+    range: Actor
+    multivalued: true
+
+  # Relations of tradition_or_practice
+  # practiced_by:
+  #   slot_uri: crm:P14_carried_out_by 
+  #   range: Actor 
+  #   multivalued: true 
+
+  has_practice_type:
+    slot_uri: crm:P2_has_type
+    range: Tradition_or_Practice
+    multivalued: true
+
+  uses: 
+    slot_uri: crm:P45_consists_of
+    range: Material 
+    multivalued: true 
+
+  tradition_associated_with:
+    slot_uri: crm:P129_is_about
+    range: Event 
+    multivalued: true 
+
+  # Source class 
+  documents_cultural_entity:
+    slot_uri: crm:P70i_is_documented_in
+    range: Cultural_Entity
+    multivalued: true
+
+  documents_event:
+    slot_uri: crm:P70i_is_documented_in
+    range: Event
+    multivalued: true
+
+  documents_tradition:
+    slot_uri: crm:P70i_is_documented_in
+    range: Tradition_or_Practice
+    multivalued: true
+
+  documents_actor:
+    slot_uri: crm:P70i_is_documented_in
+    range: Actor
+    multivalued: true
+    
+  documents_historical_period:
+    slot_uri: crm:P70i_is_documented_in
+    range: Historical_Period
+    multivalued: true
 
 
 
