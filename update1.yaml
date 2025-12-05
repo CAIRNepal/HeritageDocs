@@ -18,13 +18,17 @@ classes:
     class_uri: crm:E18_Physical_Thing
     description:
     slots:
-      # - ArtifactID 
+      # ArtifactID 
       - Name 
       - Aliases
       - Description
       - Material 
       - Dimension
-      # - DateCreated # Removed: Dating must be modeled via a CreationEvent (E12 Production)
+
+      # - DateCreated
+      # Removed: Dating should be captured through a CreationEvent (E12 Production)
+      # which links the Cultural_Entity to when and where it was created.
+
       - Condition 
       - DigitalRepresentation 
       - ConditionState
@@ -126,7 +130,7 @@ classes:
       - documented_in
       - tradition_associated_with 
 
-  CreationEvent: # NEW
+  CreationEvent: 
     class_uri: crm:E12_Production
     description: >
       An event representing the creation or production of a Cultural_Entity.
