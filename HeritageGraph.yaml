@@ -50,20 +50,21 @@ classes:
       - enshrines_deity_through_event
       - has_architectural_style
 
-  PagodaStyleTemple:
-    is_a: Temples
-    class_uri: heritageGraph:PagodaStyleTemple
-    description: "Multi-tiered roof temple indigenous to Nepal (e.g., Nyatapola, Taleju)"
+  PagodaStyle:
+    is_a: ArchitecturalStyle
+    class_uri: heritageGraph:PagodaStyle
+    description: "Multi-tiered roof architectural style indigenous to Nepal"
 
-  ShikharaStyleTemple:
-    is_a: Temples
-    class_uri: heritageGraph:ShikharaStyleTemple
-    description: "Spire-shaped temple with North Indian influence (e.g., Krishna Mandir)"
+  ShikharaStyle:
+    is_a: ArchitecturalStyle
+    class_uri: heritageGraph:ShikharaStyle
+    description: "North Indian spire-shaped architectural style"
 
-  DomeStyleTemple:
-    is_a: Temples
-    class_uri: heritageGraph:DomeStyleTemple
-    description: "Dome-shaped temples with Mughal or Neo-classical influence"
+  DomeStyle:
+    is_a: ArchitecturalStyle
+    class_uri: heritageGraph:DomeStyle
+    description: "Dome-based architectural style with Mughal or Neo-classical influence"
+
 
   BuddhistMonument:
     is_a: ArchitecturalStructure
@@ -149,6 +150,13 @@ classes:
   # ========================================================================
   # CONCEPTUAL ENTITIES (CIDOC E28 Conceptual Objects)
   # ========================================================================
+  ReligiousTradition:
+    class_uri: crm:E55_Type
+    description: "Religious or spiritual tradition within which a deity or sacred figure is venerated"
+    slots:
+      - Name
+      - english_description
+
 
   Deity:
     class_uri: crm:E28_Conceptual_Object
@@ -156,27 +164,19 @@ classes:
     slots:
       - Name
       - english_description
-      - deity_tradition
+      - has_religious_tradition
       - is_depicted_in
       - is_invoked_in_ritual
       - is_enshrined_through_event
 
-  HinduDeity:
-    is_a: Deity
-    class_uri: heritageGraph:HinduDeity
-    description: "Deity in Hindu pantheon (e.g., Shiva, Parvati, Bhairav)"
-
-  BuddhistDeity:
-    is_a: Deity
-    class_uri: heritageGraph:BuddhistDeity
-    description: "Buddha or Bodhisattva in Vajrayana Buddhist tradition"
-
-  SyncreticDeity:
-    is_a: Deity
-    class_uri: heritageGraph:SyncreticDeity
-    description: "Deity worshipped in both Hindu and Buddhist contexts (e.g., Machhindranath/Avalokiteshvara)"
+  ReligiousTradition:
+    class_uri: crm:E55_Type
+    description: "Religious or spiritual tradition within which a deity or sacred figure is venerated"
     slots:
-      - syncretic_identity_note
+      - Name
+      - english_description
+
+
 
   TraditionOrPractice:
     class_uri: crm:E28_Conceptual_Object
@@ -234,17 +234,17 @@ classes:
       - has_provenance_assertion
 
   Puja:
-    is_a: RitualEvent
+    is_a: Festival
     class_uri: heritageGraph:Puja
     description: "Worship ceremony directed toward a deity or sacred object"
 
   NityaPuja:
-    is_a: Puja
+    is_a: Festival
     class_uri: heritageGraph:NityaPuja
     description: "Daily worship ritual performed continuously"
 
   NaimittikaPuja:
-    is_a: Puja
+    is_a: Festival
     class_uri: heritageGraph:NaimittikaPuja
     description: "Occasional worship ritual tied to festivals or life events"
 
@@ -262,7 +262,7 @@ classes:
     slots:
       - uses_chariot
 
-  MaskedDanceFestival:
+  MaskedDance:
     is_a: Festival
     class_uri: heritageGraph:MaskedDanceFestival
     description: "Festival featuring masked dancers embodying deities (e.g., Kartik Naach)"
@@ -428,10 +428,11 @@ classes:
       - source_language
       - publication_timespan
 
-  HistoricalDocument:
+  Document:
     is_a: DataSource
-    class_uri: heritageGraph:HistoricalDocument
-    description: "Primary or secondary written source (manuscript, inscription, chronicle)"
+    class_uri: crm:E31_Document
+    description: "Identifiable document that records or conveys information about heritage entities or events"
+
 
   FieldSurvey:
     is_a: DataSource
@@ -687,6 +688,12 @@ slots:
     slot_uri: crm:P9_consists_of
     range: Festival
     description: "Larger festival this ritual is part of"
+
+  has_religious_tradition:
+    slot_uri: crm:P2_has_type
+    range: ReligiousTradition
+    multivalued: true
+    description: "Religious tradition(s) within which this deity is venerated"
 
   includes_ritual_event:
     slot_uri: crm:P9i_forms_part_of
@@ -1066,10 +1073,6 @@ slots:
     multivalued: true
     description: "Events where this tradition is performed"
 
-  deity_tradition:
-    slot_uri: crm:P2_has_type
-    range: string
-    description: "Religious tradition of deity (Hindu, Buddhist, Syncretic)"
 
   syncretic_identity_note:
     slot_uri: crm:P3_has_note
