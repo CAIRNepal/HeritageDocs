@@ -20,6 +20,8 @@ prefixes:
   dbo: "http://dbpedia.org/ontology/"    
   dbr: "http://dbpedia.org/resource/"    
   dbp: "http://dbpedia.org/property/"    
+  crmsci: "http://www.ics.forth.gr/isl/CRMsci/"
+  rico: "https://www.ica.org/standards/RiC/ontology#" 
 
 default_prefix: heritageGraph 
 
@@ -481,10 +483,23 @@ classes:
     is_a: DataSource
     class_uri: heritageGraph:ArchivalRecord
     description: "Government or institutional administrative record"
+    exact_mappings:
+      - rico:Record  
+    broad_mappings:
+      - crm:E31_Document
 
   DocumentationActivity:
-    class_uri: prov:Activity
-    description: "Process of recording, verifying, or digitizing heritage information"
+   
+    class_uri: crm:E13_Attribute_Assignment 
+    
+    
+    exact_mappings:
+      - prov:Activity
+    
+      
+    description: "The intellectual or technical process of recording information about a heritage entity, aligning CIDOC E13 (Attribute Assignment) with PROV-O Activity."
+    
+
     slots:
       - Name
       - activity_type
