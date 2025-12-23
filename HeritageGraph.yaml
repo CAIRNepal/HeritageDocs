@@ -17,6 +17,9 @@ prefixes:
   heritageGraph: "https://cair-nepal.org/heritageGraph/"
   prov: "https://www.w3.org/ns/prov/"
   owl: "http://www.w3.org/2002/07/owl#"
+  dbo: "http://dbpedia.org/ontology/"    
+  dbr: "http://dbpedia.org/resource/"    
+  dbp: "http://dbpedia.org/property/"    
 
 default_prefix: heritageGraph 
 
@@ -45,7 +48,18 @@ classes:
   Temples:
     is_a: ArchitecturalStructure
     class_uri: heritageGraph:Temples
-    description: "Sacred architectural structure for worship, characterized by style, deity enshrinement events, and ritual activation patterns"
+    # Functional definition for YOUR graph
+    description: "Sacred architectural structure legally classified as an 'Ancient Monument' under Nepal's preservation laws, characterized by deity enshrinement and ritual activation."
+    
+    # Mappings to global standards (The "Right Way")
+    exact_mappings:
+      - schema:HinduTemple      # Hindu context
+      - aat:300007595           # Getty Art & Architecture Thesaurus (Thesaurus ID for 'temples')
+      - wd:Q44539               # Wikidata ID for 'Temple'
+    
+    # 
+    broad_mappings:
+      - dbo:ReligiousBuilding
     slots:
       - enshrines_deity_through_event
       - has_architectural_style
@@ -264,8 +278,12 @@ classes:
 
   MaskedDance:
     is_a: Festival
-    class_uri: heritageGraph:MaskedDanceFestival
+    class_uri: heritageGraph:MaskedDance
     description: "Festival featuring masked dancers embodying deities (e.g., Kartik Naach)"
+    annotations:
+      rdfs:label:
+        - "Masked Dance"@en
+        - "मुखौटा नृत्य"@np
 
   Consecration:
     class_uri: crm:E7_Activity
