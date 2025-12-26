@@ -10,6 +10,18 @@ comments:
 
 imports:
   linkml:types 
+  linkml:skos
+enums:
+  RitualTypeEnum:
+    permissible_values:
+      NityaPuja:
+        description: "Daily mandatory worship"
+        meaning: heritageGraph:NityaPuja
+      NaimittikaPuja:
+        description: "Occasional/Festival worship"
+        meaning: heritageGraph:NaimittikaPuja
+      KamyPuja:
+        description: "Desire-based optional worship"
 
 prefixes:
   crm: "http://www.cidoc-crm.org/cidoc-crm/"
@@ -242,12 +254,17 @@ classes:
       - invokes_deity
       - performed_by_actor
       - performed_by_group
-      - uses_ritual_object
+     
       - is_part_of_festival
       - managed_by_guthi
       - follows_tradition
       - was_documented_by
       - has_provenance_assertion
+      - occurs_before
+      - occurs_after
+      - consumes_materials
+
+    
 
   Puja:
     is_a: Festival
@@ -704,6 +721,16 @@ slots:
     multivalued: true
     description: "Deity invoked or made present through ritual"
 
+  occurs_before:
+    slot_uri: crm:P120_occurs_before
+    range: RitualEvent
+    description: "Points to the next ritual in the canonical sequence."
+
+  occurs_after:
+    slot_uri: crm:P115_finishes
+    range: RitualEvent
+    description: "Points to the prerequisite ritual."
+
   performed_by_actor:
     slot_uri: crm:P14_carried_out_by
     range: Person
@@ -716,11 +743,7 @@ slots:
     multivalued: true
     description: "Group (Guthi, caste) responsible for ritual"
 
-  uses_ritual_object:
-    slot_uri: crm:P16_used_specific_object
-    range: IconographicObject
-    multivalued: true
-    description: "Sacred object used in ritual"
+  
 
   uses_chariot:
     slot_uri: crm:P16_used_specific_object
@@ -761,6 +784,12 @@ slots:
     range: Enshrinement
     multivalued: true
     description: "Enshrinement event that installed deity in temple"
+
+  consumes_material:
+    slot_uri: crm:P125_used_object_of_type
+    range: Material
+    multivalued: true
+    description: "Ephemeral materials consumed during the ritual (e.g., oil, rice)."
 
   enshrined_deity:
     slot_uri: crm:P12_occurred_in_the_presence_of
@@ -827,14 +856,26 @@ slots:
   manages_structure:
     slot_uri: heritageGraph:manages_structure
     range: ArchitecturalStructure
+    inverse: structure_managed_by
     multivalued: true
     description: "Structures managed by this Guthi"
+  # structure managed by is for inverse relationship
+  structure_managed_by:            
+    slot_uri: heritageGraph:structure_managed_by
+    range: Guthi
+    multivalued: true
 
   performs_ritual:
     slot_uri: crm:P14i_performed
     range: RitualEvent
+    inverse: ritual_performed_by
     multivalued: true
     description: "Rituals performed by this Guthi"
+  #ritual performed by is for inverse relationship
+  ritual_performed_by:            
+    slot_uri: crm:P14_carried_out_by
+    range: Guthi
+    multivalued: true
 
   holds_custody_of:
     slot_uri: crm:P52_has_current_owner
