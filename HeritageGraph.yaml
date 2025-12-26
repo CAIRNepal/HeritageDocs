@@ -161,11 +161,11 @@ classes:
       - has_current_location
       - participates_in_ritual
       - has_custody_event
-      - documented_by_event
+      - was_documented_by
       - has_condition_assessment
       - has_component
     slot_usage:
-      name:
+      Name:
         required: true
       has_current_location:
         required: true
@@ -279,7 +279,7 @@ classes:
       - element_type
       - is_component_of
     slot_usage:
-      name:
+      Name:
         required: true
       is_component_of:
         required: true
@@ -287,12 +287,7 @@ classes:
   # ========================================================================
   # CONCEPTUAL ENTITIES (CIDOC E28 Conceptual Objects)
   # ========================================================================
-  ReligiousTradition:
-    class_uri: crm:E55_Type
-    description: "Religious or spiritual tradition within which a deity or sacred figure is venerated"
-    slots:
-      - Name
-      - english_description
+
 
 
   Deity:
@@ -330,6 +325,20 @@ classes:
       - Name
       - english_description
 
+  CalendarSystem:
+    class_uri: heritageGraph:CalendarSystem
+    description: "Calendar reckoning system with conversion rules for multi-calendar temporal reasoning"
+    slots:
+      - Name
+      - calendar_system
+      - epoch_date_gregorian
+      - year_offset_from_gregorian
+    slot_usage:
+      Name:
+        required: true
+      calendar_system:
+        required: true
+        range: CalendarSystemEnum
   # ========================================================================
   # EVENT CLASSES (CIDOC-CRM Event-Centric Core)
   # ========================================================================
@@ -376,17 +385,17 @@ classes:
     
 
   Puja:
-    is_a: Festival
+    is_a: RitualEvent
     class_uri: heritageGraph:Puja
     description: "Worship ceremony directed toward a deity or sacred object"
 
   NityaPuja:
-    is_a: Festival
+    is_a: Puja
     class_uri: heritageGraph:NityaPuja
     description: "Daily worship ritual performed continuously"
 
   NaimittikaPuja:
-    is_a: Festival
+    is_a: Puja
     class_uri: heritageGraph:NaimittikaPuja
     description: "Occasional worship ritual tied to festivals or life events"
 
@@ -474,6 +483,9 @@ classes:
       - has_membership
       - founded_by_event
       - has_land_endowment
+  slot_usage:
+      guthi_type:
+        range: GuthiTypeEnum
 
   SiGuthi:
     is_a: Guthi
@@ -485,10 +497,35 @@ classes:
     class_uri: heritageGraph:JatraGuthi
     description: "Festival trust responsible for organizing and funding annual Jatra events"
 
+  PujaGuthi:
+    is_a: Guthi
+    class_uri: heritageGraph:PujaGuthi
+    description: "Worship trust responsible for daily puja rituals. Distinct from JatraGuthi."
+
   TempleGuthi:
     is_a: Guthi
     class_uri: heritageGraph:TempleGuthi
     description: "Trust managing temple maintenance, daily puja, and priest salaries"
+
+  NashaGuthi:
+    is_a: Guthi
+    class_uri: heritageGraph:NashaGuthi
+    description: "Music and dance trust (nāsaḥdyaḥ) preserving ritual performance traditions"
+
+  SanaGuthi:
+    is_a: Guthi
+    class_uri: heritageGraph:SanaGuthi
+    description: "Agricultural cooperative managing communal farmland"
+
+  SanGuthi:
+    is_a: Guthi
+    class_uri: heritageGraph:SanGuthi
+    description: "Life-cycle ritual trust managing rites of passage"
+
+  RajGuthi:
+    is_a: Guthi
+    class_uri: heritageGraph:RajGuthi
+    description: "Royal Guthi established by Malla or Shah monarchy (pre-1964)"
 
   CasteGroup:
     class_uri: crm:E74_Group
@@ -544,6 +581,13 @@ classes:
       - date_earliest
       - date_latest
       - calendar_system
+      - date_precision
+    slot_usage:
+      calendar_system:
+        
+        range: CalendarSystemEnum
+      date_precision:
+        range: DatePrecisionEnum
 
   # ========================================================================
   # PROVENANCE CLASSES (PROV-O aligned with CIDOC)
@@ -581,8 +625,7 @@ classes:
     is_a: DocumentationActivity
     class_uri: crmsci:S4_Observation 
     description: "The activity of measuring, photographing, or assessing a site in person."
-    comments:
-      - "Aligned with CHEDO model for damage assessment processes."
+   
 
   OralHistoryInterview:
     is_a: DocumentationActivity
@@ -679,7 +722,7 @@ slots:
     slot_uri: crm:P1_is_identified_by
     range: string
     description: "Primary name or label"
-    
+
   is_component_of:
     slot_uri: crm:P46i_forms_part_of
     range: ArchitecturalStructure
@@ -720,8 +763,11 @@ slots:
 
   calendar_system:
     slot_uri: heritageGraph:calendar_system
-    range: string
-    description: "Calendar used (e.g., Gregorian, Bikram Sambat, Nepal Sambat)"
+    range: CalendarSystemEnum 
+    description: "Calendar system used for date representation"
+
+
+
 
   lunar_date_tithi:
     slot_uri: heritageGraph:lunar_date_tithi
@@ -803,11 +849,11 @@ slots:
   
  
   
-PhysicalProduction:
-  union_of:
-    - ArchitecturalStructure
-    - IconographicObject
-    - ArchitecturalElement
+  PhysicalProduction:
+    union_of:
+      - ArchitecturalStructure
+      - IconographicObject
+      - ArchitecturalElement
 
   carried_out_by_actor:
     slot_uri: crm:P14_carried_out_by
@@ -985,6 +1031,7 @@ PhysicalProduction:
     inverse: structure_managed_by
     multivalued: true
     description: "Structures managed by this Guthi"
+
   # structure managed by is for inverse relationship
   structure_managed_by:            
     slot_uri: heritageGraph:structure_managed_by
@@ -994,14 +1041,11 @@ PhysicalProduction:
   performs_ritual:
     slot_uri: crm:P14i_performed
     range: RitualEvent
-    inverse: ritual_performed_by
+   
     multivalued: true
     description: "Rituals performed by this Guthi"
-  #ritual performed by is for inverse relationship
-  ritual_performed_by:            
-    slot_uri: crm:P14_carried_out_by
-    range: Guthi
-    multivalued: true
+  
+
 
   holds_custody_of:
     slot_uri: crm:P52_has_current_owner
@@ -1037,7 +1081,7 @@ PhysicalProduction:
 
   guthi_type:
     slot_uri: crm:P2_has_type
-    range: string
+    range: GuthiTypeEnum
     description: "Type of Guthi (Si, Jatra, Temple)"
 
   has_membership:
@@ -1090,6 +1134,21 @@ PhysicalProduction:
     range: string
     description: "Method used for condition assessment"
 
+  epoch_date_gregorian:
+    slot_uri: heritageGraph:epoch_date_gregorian
+    range: string
+    description: "The start date of this calendar era in Gregorian ISO format."
+
+  year_offset_from_gregorian:
+    slot_uri: heritageGraph:year_offset_from_gregorian
+    range: integer
+    description: "Mathematical offset to convert to Common Era (e.g., +57 for BS)."
+    
+  date_precision:
+    slot_uri: heritageGraph:date_precision
+    range: DatePrecisionEnum
+    description: "The level of precision for a recorded date."
+
   # --- COMPONENTS ---
 
   has_component:
@@ -1097,13 +1156,9 @@ PhysicalProduction:
     range: ArchitecturalElement
     multivalued: true
     description: "Architectural elements composing structure"
-    inverse: is_component_of  
+  
 
-  is_component_of:
-    slot_uri: crm:P46i_forms_part_of
-    range: ArchitecturalStructure
-    description: "The parent structure this element belongs to"
-    inverse: has_component
+
 
   element_type:
     slot_uri: crm:P2_has_type
@@ -1117,11 +1172,7 @@ PhysicalProduction:
 
   # --- PROVENANCE (PROV-O aligned with CIDOC) ---
 
-  was_documented_by:
-    slot_uri: prov:wasGeneratedBy
-    range: DocumentationActivity
-    multivalued: true
-    description: "Documentation event that recorded this entity"
+
 
   documented_entity:
     slot_uri: prov:generated
@@ -1171,14 +1222,16 @@ PhysicalProduction:
     description: "The factual claim being asserted"
 
   asserts_about_entity:
-    slot_uri: prov:wasGeneratedBy
+    slot_uri: crm:P140_assigned_attribute_to
     range: ArchitecturalStructure
-    description: "Heritage entity this assertion is about"
 
   asserts_about_event:
-    slot_uri: prov:wasGeneratedBy
+    slot_uri: crm:P141_assigned
     range: RitualEvent
-    description: "Event this assertion is about"
+  source_language:
+    slot_uri: crm:P72_has_language
+    range: string
+    description: "Language of the source material"
 
   was_derived_from_source:
     slot_uri: prov:wasDerivedFrom
@@ -1269,7 +1322,7 @@ PhysicalProduction:
     range: string
     description: "Type of custodian (government, academic, community)"
 
-  # --- SUPPORTING PROPERTIES ---
+
 
   occupation:
     slot_uri: crm:P2_has_type
@@ -1301,9 +1354,9 @@ PhysicalProduction:
     range: string
     description: "Explanation of syncretic dual identity"
 
-  # --- MISSING SLOT DEFINITIONS ---
 
-  documented_by_event:
+
+  was_documented_by:
     slot_uri: prov:wasGeneratedBy
     range: DocumentationActivity
     multivalued: true
@@ -1317,7 +1370,7 @@ PhysicalProduction:
 
   verification_status:
     slot_uri: heritageGraph:verification_status
-    range: Verification
+    range: string
     multivalued: true
     description: "Verification activity for this entity"
 
