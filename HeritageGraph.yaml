@@ -9,8 +9,9 @@ comments:
   - "Competency Questions: (1) Which rituals activate which deities at which sites? (2) How do Guthis mediate temple-ritual-community relationships? (3) What is the provenance chain for contested construction dates? (4) How do syncretic deities bridge Hindu-Buddhist practices spatially and temporally?"
 
 imports:
-  linkml:types 
-  linkml:skos
+  - linkml:types 
+  - linkml:skos
+default_range: string
 
 enums:
 
@@ -844,16 +845,15 @@ slots:
 
   produced_object:
     slot_uri: crm:P108_has_produced
-    range: PhysicalProduction
+    any_of:
+      - range: ArchitecturalStructure
+      - range: IconographicObject
+      - range: ArchitecturalElement
     description: "Object produced by this production event"
+    
   
- 
   
-  PhysicalProduction:
-    union_of:
-      - ArchitecturalStructure
-      - IconographicObject
-      - ArchitecturalElement
+
 
   carried_out_by_actor:
     slot_uri: crm:P14_carried_out_by
@@ -943,7 +943,7 @@ slots:
 
   ritual_type:
     slot_uri: crm:P2_has_type
-    range: string
+    range: RitualTypeEnum 
     description: "Classification of ritual (puja, jatra, consecration)"
 
   # --- DEITY-STRUCTURE RELATIONSHIPS (EVENT-MEDIATED) ---
