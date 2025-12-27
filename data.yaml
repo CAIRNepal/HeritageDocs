@@ -107,7 +107,7 @@ architectural_structures:
       name: "Pashupatinath Area"
       place_coordinates: "27.7104,85.3484"
       place_type: "Sacred Site"
-    has_architectural_style: Pagoda
+    has_architectural_style: "Pagoda" 
 
   - name: "Bagmati River Ghats"
     english_description: "Series of stone bathing and cremation platforms (ghats) along both banks of Bagmati River, including Arya Ghat for royal cremations"

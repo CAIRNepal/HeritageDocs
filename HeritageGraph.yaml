@@ -141,6 +141,8 @@ prefixes:
   chedo: "http://chedo.org/ontology#"
   crmarchaeo: "http://www.cidoc-crm.org/cidoc-crm/CRMarchaeo/"
   crmdig: "http://www.cidoc-crm.org/cidoc-crm/CRMdig/"
+  aat: https://www.getty.edu/vow/AATFullDisplay
+  wd: http://www.wikidata.org/entity/
 
 default_prefix: heritageGraph 
 
@@ -165,6 +167,8 @@ classes:
       - was_documented_by
       - has_condition_assessment
       - has_component
+      - has_architectural_style
+      
     slot_usage:
       name:
         required: true
@@ -194,7 +198,7 @@ classes:
     slot_usage:
       has_architectural_style:
         required: true
-        range: ArchitecturalStyleEnum  
+         
 
 
 
@@ -864,7 +868,7 @@ classes:
       
       metadata:
         description: "Dataset metadata"
-        range: metadata
+        range: Metadata
 
   Metadata:
     description: "Dataset metadata information"
@@ -903,6 +907,7 @@ slots:
     slot_uri: crm:P3_has_note
     range: string
     description: "Descriptive text in English"
+
 
   # --- TEMPORAL PROPERTIES ---
 
@@ -1310,7 +1315,7 @@ slots:
 
   has_architectural_style:
     slot_uri: crm:P2_has_type
-    range: ArchitecturalStyle
+    range: ArchitecturalStyleEnum 
     description: "Architectural style classification"
 
   # --- PROVENANCE (PROV-O aligned with CIDOC) ---
