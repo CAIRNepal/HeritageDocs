@@ -4,16 +4,27 @@ description: "An event-centric LinkML schema for representing cultural heritage 
 version: 1.0.0
 license: CC-BY-4.0
 
-comments:
-  - "This ontology addresses gaps in existing CIDOC-CRM extensions (CRMba, CRMsoc) by modeling Nepal-specific institutional forms (Guthi), ritual activation of sacred space, and multi-source provenance reconciliation."
-  - "Competency Questions: (1) Which rituals activate which deities at which sites? (2) How do Guthis mediate temple-ritual-community relationships? (3) What is the provenance chain for contested construction dates? (4) How do syncretic deities bridge Hindu-Buddhist practices spatially and temporally?"
-
 imports:
   - linkml:types 
   # - linkml:skos
 default_range: string
 
 enums:
+
+  ExistenceStatusEnum:
+    permissible_values:
+      Extant:
+        description: "Currently exists in physical form"
+      PartiallyExtant:
+        description: "Fragments or ruins remain"
+      Destroyed:
+        description: "Known to have been destroyed; no physical remains"
+      Lost:
+        description: "Existence documented but location/remains unknown"
+      Hypothetical:
+        description: "Reconstructed or theorized; never physically realized"
+      Unknown:
+        description: "Existence status uncertain"
 
   RitualTypeEnum:
     permissible_values:
@@ -166,7 +177,16 @@ classes:
       - has_condition_assessment
       - has_component
       - has_architectural_style
+      #slots for tracking existence status
+      - existence_status
+      - last_known_existence_date
+      - destruction_event
+      - hypothesized_location
+      - documented_in_source
+      # slots for provenance assertions
+      - has_provenance_assertion
       
+        
     slot_usage:
       name:
         required: true
@@ -259,6 +279,7 @@ classes:
       - depicts_deity
       - was_produced_by_event
       - participates_in_ritual
+      - has_current_location
 
   Paubha:
     is_a: IconographicObject
@@ -307,6 +328,7 @@ classes:
       - is_depicted_in
       - is_invoked_in_ritual
       - is_enshrined_through_event
+      - has_syncretic_equivalent
 
   ReligiousTradition:
     class_uri: crm:E55_Type
@@ -316,6 +338,18 @@ classes:
       - note
 
 
+
+HistoricalEvent:
+  class_uri: crm:E5_Event
+  description: "Major event affecting heritage structures or ritual life
+    (earthquake, epidemic, political transition, fire, flood)."
+  slots:
+    - name
+    - note
+    - has_timespan
+    - took_place_at
+    - architectural_structures
+    - includes_ritual_event
 
   TraditionOrPractice:
     class_uri: crm:E28_Conceptual_Object
@@ -543,12 +577,15 @@ classes:
     class_uri: crm:E21_Person
     description: "Individual person who performs, commissions, documents, or verifies heritage activities"
     slots:
+      - id
       - name
       - note
       - birth_timespan
       - death_timespan
       - member_of_group
       - carried_out_activity
+      - institutional_affiliation
+      - expertise_area
 
   Actor:
     class_uri: crm:E39_Actor
@@ -605,6 +642,10 @@ classes:
       - confidence_score
       - data_quality_note
       - reconciliation_status
+      # to track what is being asserted
+      - asserted_property
+      - asserted_value
+      - supersedes_assertion
 
   DataSource:
     class_uri: crm:E73_Information_Object
@@ -616,9 +657,8 @@ classes:
       - source_language
       - publication_timespan
       - note
-
-
- 
+      - source_type
+      - archival_location
 
   FieldSurveyActivity:
     is_a: DocumentationActivity
@@ -672,6 +712,7 @@ classes:
       - used_equipment
       - generated_assertion
       - has_timespan
+    
 
   Verification:
     is_a: DocumentationActivity
@@ -690,12 +731,64 @@ classes:
       - name
       - custodian_type
       - note
+  
+  DestructionEvent:
+    class_uri: crm:E6_Destruction
+    description: "Event that destroyed or damaged a structure."
+    slots:
+      - note
+      - has_timespan
+      - took_place_at
+     
+
+
+
 
  
 
+  
     # ============================================================================
   # LIVING GODDESS (KUMARI) CLASSES
   # ============================================================================
+
+  SyncreticRelationship:
+    class_uri: heritageGraph:SyncreticRelationship
+    description: "
+      Explicit relationship linking a deity or sacred figure across multiple
+      religious traditions (Hindu, Buddhist, local). Documents how the same
+      divine entity is understood, named, and worshipped differently in
+      different traditions, with evidence from rituals, texts, and practices."
+    exact_mappings:
+      - crm:E55_Type
+    broad_mappings:
+      - crm:E28_Conceptual_Object
+    slots:
+      - name
+      - note
+      - primary_deity
+      - equivalent_deity
+      - performs_ritual
+      - has_religious_tradition
+      - syncretic_type
+      - was_documented_by
+      - has_provenance_assertion
+      - was_documented_by
+    slot_usage:
+      name:
+        required: true
+        description: "Name of syncretic relationship (e.g., 'Avalokiteshvara–Matsyendranath Equivalence')"
+      primary_deity:
+        required: true
+        description: "Primary deity in this syncretic relationship"
+      equivalent_deity:
+        required: true
+        multivalued: true
+        description: "Equivalent deity/deities in other traditions"
+      syncretic_type:
+        required: true
+        description: "Type of syncretic relationship"
+     
+
 
   LivingGoddessTenure:
     class_uri: heritageGraph:LivingGoddessTenure
@@ -883,6 +976,14 @@ classes:
         multivalued: true
         inlined: true
         inlined_as_list: true
+        
+      syncretic_relationships:
+        description: "Collection of SyncreticRelationship instances"
+        range: SyncreticRelationship
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+
       
       religious_traditions:
         description: "Collection of ReligiousTradition instances"
@@ -1041,7 +1142,12 @@ classes:
 # ============================================================================
 
 slots:
-  # --- IDENTIFIERS AND LABELS ---
+  id:
+    identifier: true
+    range: string
+    required: true
+    description: "Unique identifier for this instance"
+ 
   
   name:
     slot_uri: crm:P1_is_identified_by
@@ -1175,6 +1281,7 @@ slots:
 
   # --- SPATIAL PROPERTIES ---
 
+
   place_coordinates:
     slot_uri: crm:P168_place_is_defined_by
     range: string
@@ -1209,6 +1316,28 @@ slots:
     description: "Structures located in this place"
 
   # --- EVENT-CENTRIC PRODUCTION RELATIONSHIPS ---
+  existence_status:
+    range: ExistenceStatusEnum
+    description: "Current physical status of the structure"
+
+  last_known_existence_date:
+    range: date
+    description: "Latest date when this structure is documented as existing"
+
+  destruction_event:
+    range: DestructionEvent
+    description: "Event that destroyed this structure (if known)"
+
+  hypothesized_location:
+    range: Place
+    multivalued: true
+    description: "Possible locations if the structure is lost"
+
+  documented_in_source:
+    range: DataSource
+    multivalued: true
+    description: "Historical/archaeological sources describing this structure"
+
 
   was_produced_by_event:
     slot_uri: crm:P108i_was_produced_by
@@ -1295,6 +1424,29 @@ slots:
     description: "Classification of ritual (puja, jatra, consecration)"
 
   # --- DEITY-STRUCTURE RELATIONSHIPS (EVENT-MEDIATED) ---
+  primary_deity:
+    slot_uri: heritageGraph:primary_deity
+    range: Deity
+    description: "Primary deity or sacred figure in a syncretic relationship"
+
+  equivalent_deity:
+    slot_uri: heritageGraph:equivalent_deity
+    range: Deity
+    multivalued: true
+    description: "Deity/deities considered equivalent in other religious traditions"
+    
+
+  has_syncretic_equivalent:
+    slot_uri: heritageGraph:has_syncretic_equivalent
+    range: SyncreticRelationship
+    multivalued: true
+    description: "Syncretic relationships in which this deity participates"
+    
+
+  syncretic_type:
+    slot_uri: heritageGraph:syncretic_type
+    range: SyncreticTypeEnum
+    description: "Type of syncretic relationship (equivalence, appropriation, fusion, historical)"
 
   enshrines_deity_through_event:
     slot_uri: heritageGraph:enshrines_deity_through_event
@@ -1501,6 +1653,42 @@ slots:
     description: "Architectural style classification"
 
   # --- PROVENANCE (PROV-O aligned with CIDOC) ---
+  source_type:
+    range: string
+    description: " Type of source: Manuscript, Inscription, FieldSurvey, 
+      PublishedBook, Archive, MuseumCollection, OralHistoryInterview, etc.""
+
+  archival_location:
+    range: string
+    description: "Where stored (e.g., National Museum Kathmandu, British Library, URL)"
+
+  asserted_property:
+    range: string
+    required: true
+    description: "Property or attribute name (e.g., 'existence_status', 'hypothesized_location', 'construction_date')"
+
+  asserted_value:
+    range: string
+    required: true
+    description: "The value claimed for this property (e.g., 'Lost', 'Handigaun', '598 CE')"
+
+  supersedes_assertion:
+    slot_uri: prov:invalidated
+    range: ProvenanceAssertion
+    description: "
+      Previous version of this assertion (if this is an update).
+      Creates version chain: A1 → A2 → A3
+      Query pattern: latest assertion = one with no incoming prov:invalidated"
+
+  institutional_affiliation:
+    range: string
+    description: "Institutional affiliation (e.g., Tribhuvan University, Nepal Heritage Society)"
+
+  expertise_area:
+    range: string
+    multivalued: true
+    description: "Areas of expertise (e.g., Lichhavi inscriptions, Sanskrit epigraphy, Newari archaeology)"
+
   documented_entity:
     slot_uri: prov:generated
     range: ArchitecturalStructure
@@ -1533,10 +1721,10 @@ slots:
   # --- ASSERTION-LEVEL PROVENANCE ---
 
   has_provenance_assertion:
-    slot_uri: heritageGraph:has_provenance_assertion
+    slot_uri: prov:entity
     range: ProvenanceAssertion
     multivalued: true
-    description: "Provenance assertions about this entity or event"
+    description: "All factual claims about this structure with full provenance"
 
   assertion_content:
     slot_uri: prov:value
