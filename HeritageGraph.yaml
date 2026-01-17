@@ -32,6 +32,8 @@ enums:
       NityaPuja:
         description: "Daily mandatory worship"
         meaning: heritageGraph:NityaPuja
+        exact_mappings:
+          - aat:300055603  
       NaimittikaPuja:
         description: "Occasional/Festival worship"
         meaning: heritageGraph:NaimittikaPuja
@@ -41,28 +43,43 @@ enums:
       Abhisheka:
         description: "Ritual bathing/anointing of deity"
         meaning: heritageGraph:Abhisheka
+        exact_mappings:
+          - aat:300264383  
       Homa:
         description: "Fire offering ritual"
         meaning: heritageGraph:Homa
+        exact_mappings:
+          - aat:300264387 
       Bhajan:
         description: "Devotional singing ritual"
         meaning: heritageGraph:Bhajan
+        exact_mappings:
+          - aat:300264388  
       Yagna:
         description: "Vedic sacrifice ritual"
         meaning: heritageGraph:Yagna
+        exact_mappings:
+          - aat:300264386  
       Vrata:
         description: "Vow observance ritual"
         meaning: heritageGraph:Vrata
+        exact_mappings:
+          - aat:300264389 
       Jatra:
         description: "Festival procession ritual"
         meaning: heritageGraph:Jatra
+        exact_mappings:
+          - aat:300264390  
       ChariotProcession:
         description: "Ritual chariot pulling"
         meaning: heritageGraph:ChariotProcession
+        exact_mappings:
+          - aat:300254776  
       MaskedPerformance:
         description: "Ritual masked dance"
         meaning: heritageGraph:MaskedPerformance
-
+        exact_mappings:
+          - aat:300264391  
 
   CalendarSystemEnum:
     permissible_values:
@@ -107,17 +124,25 @@ enums:
 
   
   ArchitecturalStyleEnum:
-    permissible_values:
-      Pagoda:
-        description: "Multi-tiered roof style indigenous to Nepal"
-      Shikhara:
-        description: "North Indian spire-shaped style"
-      Dome:
-        description: "Dome-based style (Mughal/Neo-classical influence)"
-      Chaitya:
-        description: "Buddhist votive shrine style"
-      Stupa:
-        description: "Buddhist dome-shaped reliquary"
+      description: "A vocabulary of architectural styles for South Asian heritage, mapped to CIDOC E55 Type."
+      
+      enum_uri: crm:E55_Type  
+      permissible_values:
+        Pagoda:
+          description: "Multi-tiered roof style indigenous to Nepal"
+          meaning: aat:300004829
+        Shikhara:
+          description: "North Indian spire-shaped style"
+          meaning: aat:300446671
+        Dome:
+          description: "Dome-based style (Mughal/Neo-classical influence)"
+          meaning: aat:300001285
+        Chaitya:
+          description: "Buddhist votive shrine style"
+          meaning: aat:300007562
+        Stupa:
+          description: "Buddhist dome-shaped reliquary"
+          meaning: aat:300007576
 
   #Guthi type enum
   GuthiTypeEnum:
@@ -193,7 +218,7 @@ classes:
 
   ArchitecturalStructure:
     is_a: HumanMadeObject
-    class_uri: crm:E24_Physical_Man-Made_Thing
+    class_uri: crm:E22_Human-Made_Object
     description: "Physical structures built for religious, social, or civic purposes. Links to events of production, use, custody, and documentation."
     
     exact_mappings:
@@ -311,7 +336,7 @@ classes:
 
   IconographicObject:
     is_a: HumanMadeObject
-    class_uri: crm:E24_Physical_Man-Made_Thing
+    class_uri:  crm:E22_Human-Made_Object 
     description: "Sacred visual art objects that depict or embody deities through iconographic conventions"
     exact_mappings:
       - aat:300033618  
@@ -389,15 +414,6 @@ classes:
       - is_enshrined_through_event
       - has_syncretic_equivalent
 
-  ReligiousTradition:
-    class_uri: crm:E55_Type
-    description: "Religious or spiritual tradition within which a deity or sacred figure is venerated"
-    slots:
-      - name
-      - note
-
-
-
   HistoricalEvent:
     class_uri: crm:E5_Event
     description: "Major event affecting heritage structures or ritual life
@@ -410,22 +426,12 @@ classes:
       - architectural_structures
       - includes_ritual_event
 
-  TraditionOrPractice:
-    class_uri: crm:E28_Conceptual_Object
-    description: "Transmitted knowledge, belief system, or ritual protocol (e.g., Tantric initiation sequences, festival choreography)"
-    slots:
-      - name
-      - note
-
-  ArchitecturalStyle:
-    class_uri: crm:E55_Type
-    description: "Typological classification of temple architecture (Pagoda, Shikhara, Dome)"
-    slots:
-      - name
-      - note #need to define the enums
-
   CalendarSystem:
-    class_uri: heritageGraph:CalendarSystem
+
+    class_uri: time:Calendar
+    exact_mappings:
+      - time:Calendar
+      - crm:E58_Measurement_Unit
     description: "Calendar reckoning system with conversion rules for multi-calendar temporal reasoning"
     slots:
       - name
@@ -474,34 +480,16 @@ classes:
       - performed_by_group
      
       - is_part_of_festival
-      - managed_by_guthi 
-      - follows_tradition
+      - managed_by_guthi
       - was_documented_by
       - has_provenance_assertion
       - occurs_before
       - occurs_after
       - used_materials
 
-    
-
-  Puja:
-    is_a: RitualEvent
-    class_uri: heritageGraph:Puja
-    description: "Worship ceremony directed toward a deity or sacred object"
-
-  NityaPuja:
-    is_a: Puja
-    class_uri: heritageGraph:NityaPuja
-    description: "Daily worship ritual performed continuously"
-
-  NaimittikaPuja:
-    is_a: Puja
-    class_uri: heritageGraph:NaimittikaPuja
-    description: "Occasional worship ritual tied to festivals or life events"
-
   Festival:
     is_a: RitualEvent
-    class_uri: crm:E5_Event
+    class_uri: crm:E7_Activity
     description: "Large-scale community ritual event (Jatra) involving processions, music, and collective participation"
     slots:
       - includes_ritual_event
@@ -572,7 +560,6 @@ classes:
       - name
       - note
       - guthi_type
-      - manages_structure
       - performs_ritual
       - holds_custody_of
       - has_membership
@@ -690,7 +677,7 @@ classes:
   # PROVENANCE CLASSES (PROV-O aligned with CIDOC)
   # ========================================================================
 
-  Assertion:
+  HeritageAssertion:
     class_uri: prov:Entity
     description: "A single factual claim about a heritage entity, with explicit source, author, date, and confidence"
     slots:
@@ -909,7 +896,7 @@ classes:
       - carried_out_by
       - performed_by_group
       - took_place_at
-      - follows_tradition
+     
       - has_provenance_assertion
       - was_documented_by
     
@@ -961,7 +948,7 @@ classes:
       - has_timespan
       - carried_out_by
       - performed_by_group
-      - follows_tradition
+       
       - took_place_at
       - selection_criteria_met
       - has_provenance_assertion
@@ -1442,11 +1429,6 @@ slots:
     multivalued: true
     description: "Group (Guthi, caste) responsible for ritual"
 
-  follows_tradition:
-    slot_uri: crm:P33_used_specific_technique
-    range: TraditionOrPractice
-    description: "Transmitted ritual protocol followed"
-
   is_part_of_festival:
     slot_uri: crm:P9_consists_of
     range: Festival
@@ -1577,9 +1559,7 @@ slots:
     multivalued: true
     description: "Guthi organization managing this structure or ritual"
 
-  manages_structure:
-    slot_uri: heritageGraph:manages_structure
-    range: ArchitecturalStructure
+ 
     
     multivalued: true
     description: "Structures managed by this Guthi" 
@@ -1817,7 +1797,7 @@ slots:
 
   generated_assertion:
     slot_uri: prov:generated
-    range: Assertion
+    range: HeritageAssertion
     multivalued: true
     description: "Assertions generated by documentation activity"
 
@@ -1844,7 +1824,7 @@ slots:
     description: "Method used for verification (cross-check, expert review, field visit)"
   verified_assertion:
     slot_uri: heritageGraph:verified_assertion
-    range: Assertion
+    range: HeritageAssertion
     multivalued: true
     description: "Assertions verified by this activity"
   verified_by_expert:
