@@ -11,6 +11,17 @@ imports:
 default_range: string
 
 enums:
+  ConditionTypeEnum:
+    permissible_values:
+      Good:
+        description: "No significant damage"
+      Damaged:
+        description: "Partially damaged"
+      Ruined:
+        description: "Severely damaged or collapsed"
+      Restored:
+        description: "Repaired and stabilized"
+
 
   ExistenceStatusEnum:
     permissible_values:
@@ -146,23 +157,33 @@ enums:
 
   #Guthi type enum
   GuthiTypeEnum:
+    description: "Controlled vocabulary of Guthi functional types (CRM E55_Type)"
     permissible_values:
       SiGuthi:
         description: "Funeral trust"
+        class_uri: crm:E55_Type
       JatraGuthi:
         description: "Festival organization trust"
+        class_uri: crm:E55_Type
       PujaGuthi:
         description: "Daily worship trust"
+        class_uri: crm:E55_Type
       TempleGuthi:
         description: "Temple maintenance trust"
+        class_uri: crm:E55_Type
       NashaGuthi:
         description: "Music and dance trust"
+        class_uri: crm:E55_Type
       SanaGuthi:
         description: "Agricultural cooperative trust"
+        class_uri: crm:E55_Type
       SanGuthi:
         description: "Life-cycle ritual trust"
+        class_uri: crm:E55_Type
       RajGuthi:
         description: "Royal endowment trust"
+        class_uri: crm:E55_Type
+
 
 prefixes:
   
@@ -208,7 +229,8 @@ classes:
     exact_mappings:
       - schema:CreativeWork
       - aat:300033618 
-      - dbo:Work
+      - wikidata:Q838948
+   
     slots:
       - id
       - name
@@ -218,12 +240,14 @@ classes:
 
   ArchitecturalStructure:
     is_a: HumanMadeObject
-    class_uri: crm:E22_Human-Made_Object
+    class_uri: crm:E24_Physical_Human-Made_Thing
+
     description: "Physical structures built for religious, social, or civic purposes. Links to events of production, use, custody, and documentation."
     
     exact_mappings:
       - aat:300006888
-      - dbo:ArchitecturalStructure
+      - schema:Place
+      - wikidata:Q811979
     slots:
       - name
       - note
@@ -370,7 +394,7 @@ classes:
       - wikidata:Q2594295
     slots:
       - consecrated_by_event
-      - houses_deity_presence
+      - is_about_deity
 
   ArchitecturalElement:
     class_uri: crm:E25_Architectural_Element
@@ -547,7 +571,16 @@ classes:
       - assessed_condition_state
       - carried_out_by
       - has_timespan
-      - assessment_method
+      
+  ConditionState:
+    class_uri: crm:E3_Condition_State
+    description: "A physical condition state of a heritage object"
+    slots:
+      - name
+      - note
+      - has_condition_type
+     
+
 
   # ========================================================================
   # SOCIAL ORGANIZATIONS (CIDOC E74 Group)
@@ -563,8 +596,8 @@ classes:
       - performs_ritual
       - holds_custody_of
       - has_membership
-      - founded_by_event
-      - has_land_endowment
+     
+      # - has_land_endowment
     slot_usage:
       guthi_type:
         range: GuthiTypeEnum
@@ -678,7 +711,12 @@ classes:
   # ========================================================================
 
   HeritageAssertion:
-    class_uri: prov:Entity
+
+    class_uri: crminf:I2_Belief  # ISO standard for arguments
+    exact_mappings:
+      - prov:Entity
+      - schema:Claim
+
     description: "A single factual claim about a heritage entity, with explicit source, author, date, and confidence"
     slots:
       - assertion_content
@@ -1177,13 +1215,16 @@ slots:
 
   id:
     identifier: true
-    range: string
+    range: uriorcurie 
     required: true
-    description: "Unique identifier for this instance"
+    description: "Globally unique URI identifier"
+    slot_uri: dct:identifier
+    exact_mappings:
+      - schema:identifier
  
   
   name:
-    slot_uri: crm:P1_is_identified_by
+    slot_uri: rdfs:label 
     range: string
     description: "Primary name or label"
 
@@ -1202,18 +1243,15 @@ slots:
   # LIVING GODDESS (KUMARI) SLOTS
   # ============================================================================
 
-  has_participant:
+  had_participant:
     slot_uri: crm:P11_had_participant
-    range: Person
+    range: Actor
     multivalued: true
-    description: "Person(s) who participated in or were subject of this event or situation"
-   
 
   embodied_deity:
-    slot_uri: heritageGraph:embodied_deity
+    slot_uri: crm:P14.1_in_the_role_of  # ✅ Use CRM role mechanism
     range: Deity
-    description: "Deity believed to be present in and embodied by a person during Living Goddess tenure. Distinct from worship (invokes_deity) or depiction (depicts_deity) - the person IS the deity's living form."
-  
+    description: "Deity role embodied by participant"
 
   residence_structure:
     slot_uri: crm:P74_has_current_or_former_residence
@@ -1316,9 +1354,9 @@ slots:
 
 
   place_coordinates:
-    slot_uri: crm:P168_place_is_defined_by
-    range: string
-    description: "Geographic coordinates (WGS84: lat,lon)"
+    slot_uri: geo:asWKT  
+    range: geo:wktLiteral
+    description: "Coordinates as WKT literal"
 
   place_type:
     slot_uri: crm:P2_has_type
@@ -1331,7 +1369,7 @@ slots:
     description: "Current location of object or structure"
 
   took_place_at:
-    slot_uri: crm:P7_took_place_at
+    slot_uri: crm:P7_took_place_at 
     range: Place
     description: "Place Where event occurred"
 
@@ -1354,8 +1392,8 @@ slots:
     description: "Current physical status of the structure"
 
   last_known_existence_date:
-    range: date
-    description: "Latest date when this structure is documented as existing"
+    range: datetime
+    description: "Latest date when this structure is documented as existing (ISO 8601 date string)"
 
   destruction_event:
     range: DestructionEvent
@@ -1406,7 +1444,7 @@ slots:
   # --- RITUAL EVENT RELATIONSHIPS ---
 
   invokes_deity:
-    slot_uri: crm:P12_occurred_in_the_presence_of
+    slot_uri: crm:P140_assigned_attribute_to
     range: Deity
     multivalued: true
     description: "Deity invoked or made present through ritual"
@@ -1525,10 +1563,10 @@ slots:
     range: IconographicObject
     multivalued: true
     
-  houses_deity_presence:
-    slot_uri: heritageGraph:houses_deity_presence
+  is_about_deity:
+    slot_uri: crm:P129_is_about
     range: Deity
-    description: "Deity made present through consecration (not mere depiction)"
+    description: "Deity represented and ritually associated with the Murti"
 
   consecrated_by_event:
     slot_uri: heritageGraph:consecrated_by_event
@@ -1546,7 +1584,7 @@ slots:
     description: "Deity made present through consecration"
 
   is_invoked_in_ritual:
-    slot_uri: crm:P12i_was_present_at
+    slot_uri: crm:P129i_is_subject_of
     range: RitualEvent
     multivalued: true
     description: "Rituals where this deity is invoked"
@@ -1573,13 +1611,13 @@ slots:
   
 
   holds_custody_of:
-    slot_uri: crm:P52_has_current_owner
+    slot_uri: crm:P50_has_current_keeper
     range: ArchitecturalStructure
     multivalued: true
     description: "Structures under Guthi custodianship"
 
   has_custody_event:
-    slot_uri: crm:E10_Transfer_of_Custody
+    slot_uri: crm:P30i_custody_transferred_through
     range: TransferOfCustody
     multivalued: true
     description: "Custody transfer events for this structure"
@@ -1597,7 +1635,7 @@ slots:
   transferred_to_actor:
     slot_uri: crm:P29_custody_received_by
     range: Actor
-    description: "New custodian (person)"
+    description: "New custodian (person or group)"
 
   transferred_to_guthi:
     slot_uri: crm:P29_custody_received_by
@@ -1621,15 +1659,10 @@ slots:
     multivalued: true
     description: "Groups this person belongs to"
 
-  founded_by_event:
-    slot_uri: crm:P95i_was_formed_by
-    range: Production
-    description: "Event that established the Guthi"
-
-  has_land_endowment:
-    slot_uri: heritageGraph:has_land_endowment
-    range: string
-    description: "Description of land holdings supporting Guthi"
+  # has_land_endowment:
+  #   slot_uri: heritageGraph:has_land_endowment
+  #   range: string
+  #   description: "Description of land holdings supporting Guthi"
 
   traditional_role:
     slot_uri: heritageGraph:traditional_role
@@ -1639,10 +1672,16 @@ slots:
   # --- CONDITION ASSESSMENT ---
 
   has_condition_assessment:
-    slot_uri: crm:P44_has_condition
+    slot_uri: crm:P34i_was_assessed_by
     range: ConditionAssessment
     multivalued: true
     description: "Condition assessment events for this structure"
+  has_condition_type:
+    slot_uri: crm:P2_has_type
+    range:  ConditionTypeEnum
+    description: "Categorization of the condition state"
+
+
 
   assessed_object:
     slot_uri: crm:P34_concerned
@@ -1651,13 +1690,10 @@ slots:
 
   assessed_condition_state:
     slot_uri: crm:P35_has_identified
-    range: string
-    description: "Identified condition state (good, damaged, ruined)"
+    range: ConditionState
+    description: "Condition state identified by the assessment"
 
-  assessment_method:
-    slot_uri: crm:P33_used_specific_technique
-    range: string
-    description: "Method used for condition assessment"
+
 
   epoch_date_gregorian:
     slot_uri: heritageGraph:epoch_date_gregorian
